@@ -4,85 +4,85 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Age Calculator | Faisal69XD</title>
-  <meta name="description" content="Professional red theme Age Calculator showing detailed years, months, days, hours, minutes, and seconds." />
-  <meta name="keywords" content="age calculator, detailed, years, months, days, Faisal69XD" />
+  <meta name="description" content="Professional red-theme Age Calculator to find exact age in years, months, days, hours, minutes, and seconds.">
+  <meta name="keywords" content="age calculator, red theme, Faisal69XD, calculator.net style, date of birth calculator">
 
   <style>
     body {
       font-family: "Poppins", sans-serif;
-      background-color: #f9f9f9;
+      background-color: #fafafa;
       margin: 0;
+      padding: 0;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       min-height: 100vh;
     }
 
     .container {
       background: #fff;
+      margin-top: 50px;
       padding: 30px;
-      border-radius: 15px;
+      border-radius: 12px;
       box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-      max-width: 550px;
-      width: 100%;
-      text-align: center;
+      width: 95%;
+      max-width: 500px;
     }
 
     h1 {
       color: #c70039;
+      text-align: center;
       margin-bottom: 25px;
       font-size: 26px;
     }
 
-    .input-group {
+    label {
+      font-weight: 600;
+      display: block;
+      margin: 10px 0 8px;
+      color: #222;
+    }
+
+    .date-row {
       display: flex;
       gap: 10px;
-      justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
     }
 
-    select, input[type="number"], input[type="date"] {
-      padding: 10px;
-      border-radius: 10px;
+    select, input[type="number"] {
+      padding: 8px;
       border: 2px solid #ddd;
-      font-size: 16px;
-      outline: none;
-      transition: 0.3s;
-      width: 22%;
+      border-radius: 8px;
+      font-size: 15px;
+      flex: 1;
       min-width: 90px;
+      outline: none;
     }
 
     select:focus, input:focus {
       border-color: #c70039;
     }
 
-    .calendar {
-      position: relative;
-      width: 22%;
-      min-width: 90px;
-    }
-
-    .calendar input {
-      width: 100%;
-      padding-right: 35px;
-    }
-
-    .calendar span {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
+    input[type="date"] {
+      padding: 8px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      flex: 1.3;
       cursor: pointer;
-      color: #c70039;
-      font-size: 20px;
+    }
+
+    input[type="date"]:focus {
+      border-color: #c70039;
     }
 
     button {
-      background-color: #c70039;
+      width: 100%;
+      background: #c70039;
       color: #fff;
+      padding: 12px;
       border: none;
-      padding: 12px 20px;
       border-radius: 10px;
       font-size: 16px;
       cursor: pointer;
@@ -91,26 +91,24 @@
     }
 
     button:hover {
-      background-color: #a5002e;
+      background: #a5002e;
     }
 
     #result {
-      margin-top: 25px;
-      font-size: 18px;
-      font-weight: 600;
-      color: #222;
-      text-align: left;
-      line-height: 1.7;
       background: #fff5f7;
       border-left: 4px solid #c70039;
-      padding: 10px 15px;
+      margin-top: 25px;
+      padding: 15px;
       border-radius: 8px;
+      font-size: 16px;
+      line-height: 1.7;
     }
 
     footer {
+      text-align: center;
       margin-top: 25px;
-      font-size: 14px;
       color: #555;
+      font-size: 14px;
     }
 
     footer a {
@@ -124,14 +122,20 @@
   <div class="container">
     <h1>Age Calculator</h1>
 
-    <div class="input-group">
-      <input type="number" id="months" placeholder="Months" min="0" />
-      <input type="number" id="days" placeholder="Days" min="0" />
-      <input type="number" id="years" placeholder="Years" min="0" />
-      <div class="calendar">
-        <input type="date" id="dob" />
-        <span onclick="document.getElementById('dob').showPicker()">📅</span>
-      </div>
+    <label>Date of Birth</label>
+    <div class="date-row">
+      <select id="dob-month"></select>
+      <select id="dob-day"></select>
+      <input type="number" id="dob-year" placeholder="Year" min="1900" max="2100">
+      <input type="date" id="dob-picker" onchange="syncFromPicker('dob')">
+    </div>
+
+    <label>Age at the Date of</label>
+    <div class="date-row">
+      <select id="today-month"></select>
+      <select id="today-day"></select>
+      <input type="number" id="today-year" placeholder="Year" min="1900" max="2100">
+      <input type="date" id="today-picker" onchange="syncFromPicker('today')">
     </div>
 
     <button onclick="calculateAge()">Calculate</button>
@@ -144,34 +148,65 @@
   </div>
 
   <script>
-    function calculateAge() {
-      const dobInput = document.getElementById("dob").value;
-      if (!dobInput) {
-        document.getElementById("result").innerText = "Please select a date of birth.";
-        return;
+    // Populate dropdowns
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    function populateDropdowns(prefix) {
+      const monthSelect = document.getElementById(`${prefix}-month`);
+      const daySelect = document.getElementById(`${prefix}-day`);
+      for (let i=0; i<12; i++) {
+        const opt = document.createElement("option");
+        opt.value = i+1;
+        opt.text = months[i];
+        monthSelect.add(opt);
       }
+      for (let d=1; d<=31; d++) {
+        const opt = document.createElement("option");
+        opt.value = d;
+        opt.text = d;
+        daySelect.add(opt);
+      }
+    }
 
-      const dob = new Date(dobInput);
-      const today = new Date();
+    populateDropdowns("dob");
+    populateDropdowns("today");
 
-      if (dob > today) {
-        document.getElementById("result").innerText = "Date of birth cannot be in the future.";
+    function syncFromPicker(prefix) {
+      const picker = document.getElementById(`${prefix}-picker`);
+      const date = new Date(picker.value);
+      if (isNaN(date)) return;
+      document.getElementById(`${prefix}-month`).value = date.getMonth()+1;
+      document.getElementById(`${prefix}-day`).value = date.getDate();
+      document.getElementById(`${prefix}-year`).value = date.getFullYear();
+    }
+
+    function calculateAge() {
+      const dob = new Date(
+        document.getElementById("dob-year").value,
+        document.getElementById("dob-month").value - 1,
+        document.getElementById("dob-day").value
+      );
+      const today = new Date(
+        document.getElementById("today-year").value,
+        document.getElementById("today-month").value - 1,
+        document.getElementById("today-day").value
+      );
+      if (isNaN(dob) || isNaN(today) || dob > today) {
+        document.getElementById("result").innerText = "Please select valid dates.";
         return;
       }
 
       let years = today.getFullYear() - dob.getFullYear();
-      let months = today.getMonth() - dob.getMonth();
-      let days = today.getDate() - dob.getDate();
+      let monthsDiff = today.getMonth() - dob.getMonth();
+      let daysDiff = today.getDate() - dob.getDate();
 
-      if (days < 0) {
-        months--;
+      if (daysDiff < 0) {
+        monthsDiff--;
         const lastMonthDays = new Date(today.getFullYear(), today.getMonth(), 0).getDate();
-        days += lastMonthDays;
+        daysDiff += lastMonthDays;
       }
-
-      if (months < 0) {
+      if (monthsDiff < 0) {
         years--;
-        months += 12;
+        monthsDiff += 12;
       }
 
       const diffMs = today - dob;
@@ -179,12 +214,12 @@
       const totalMinutes = Math.floor(totalSeconds / 60);
       const totalHours = Math.floor(totalMinutes / 60);
       const totalDays = Math.floor(totalHours / 24);
-      const totalMonths = years * 12 + months;
+      const totalMonths = years * 12 + monthsDiff;
 
       document.getElementById("result").innerHTML = `
-        Age:<br>
-        ${years} years, ${months} months, ${days} days<br><br>
-        Or total:<br>
+        <strong>Age:</strong><br>
+        ${years} years, ${monthsDiff} months, ${daysDiff} days<br><br>
+        <strong>Or total:</strong><br>
         ${totalMonths} months<br>
         ${totalDays} days<br>
         ${totalHours} hours<br>
