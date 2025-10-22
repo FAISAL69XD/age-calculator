@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Age Calculator | Faisal69XD</title>
   <meta name="description" content="Professional red theme Age Calculator showing detailed years, months, days, hours, minutes, and seconds." />
-  <meta name="keywords" content="age calculator, red theme, Faisal69XD, professional design" />
+  <meta name="keywords" content="age calculator, detailed, years, months, days, Faisal69XD" />
+
   <style>
     body {
       font-family: "Poppins", sans-serif;
@@ -22,7 +23,7 @@
       padding: 30px;
       border-radius: 15px;
       box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-      max-width: 480px;
+      max-width: 550px;
       width: 100%;
       text-align: center;
     }
@@ -33,52 +34,48 @@
       font-size: 26px;
     }
 
-    label {
-      display: block;
-      margin-top: 15px;
-      font-weight: 600;
-      color: #333;
+    .input-group {
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
     }
 
-    select, input[type="date"] {
-      width: 100%;
+    select, input[type="number"], input[type="date"] {
       padding: 10px;
       border-radius: 10px;
       border: 2px solid #ddd;
       font-size: 16px;
       outline: none;
       transition: 0.3s;
-      margin-top: 8px;
-      background: white;
+      width: 22%;
+      min-width: 90px;
     }
 
     select:focus, input:focus {
       border-color: #c70039;
     }
 
-    .calendar-container {
+    .calendar {
       position: relative;
-      display: flex;
-      align-items: center;
-      margin-top: 8px;
+      width: 22%;
+      min-width: 90px;
     }
 
-    .calendar-container input {
+    .calendar input {
       width: 100%;
-      padding-right: 40px;
+      padding-right: 35px;
     }
 
-    .calendar-icon {
+    .calendar span {
       position: absolute;
       right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
       cursor: pointer;
       color: #c70039;
       font-size: 20px;
-      transition: 0.3s;
-    }
-
-    .calendar-icon:hover {
-      color: #a5002e;
     }
 
     button {
@@ -127,23 +124,15 @@
   <div class="container">
     <h1>Age Calculator</h1>
 
-    <label>Month</label>
-    <select id="month"></select>
-
-    <label>Day</label>
-    <select id="day"></select>
-
-    <label>Year</label>
-    <select id="year"></select>
-
-    <label>Date Picker</label>
-    <div class="calendar-container">
-      <input type="date" id="calendar" />
-      <span class="calendar-icon" onclick="document.getElementById('calendar').showPicker()">📅</span>
+    <div class="input-group">
+      <input type="number" id="months" placeholder="Months" min="0" />
+      <input type="number" id="days" placeholder="Days" min="0" />
+      <input type="number" id="years" placeholder="Years" min="0" />
+      <div class="calendar">
+        <input type="date" id="dob" />
+        <span onclick="document.getElementById('dob').showPicker()">📅</span>
+      </div>
     </div>
-
-    <label for="today">Calculate Age At</label>
-    <input type="date" id="today" />
 
     <button onclick="calculateAge()">Calculate</button>
 
@@ -155,64 +144,18 @@
   </div>
 
   <script>
-    const monthSelect = document.getElementById("month");
-    const daySelect = document.getElementById("day");
-    const yearSelect = document.getElementById("year");
-    const calendar = document.getElementById("calendar");
-
-    // Fill months
-    const months = [
-      "January","February","March","April","May","June",
-      "July","August","September","October","November","December"
-    ];
-    months.forEach((m, i) => {
-      const opt = document.createElement("option");
-      opt.value = i;
-      opt.text = m;
-      monthSelect.appendChild(opt);
-    });
-
-    // Fill years (1900–current)
-    const currentYear = new Date().getFullYear();
-    for (let y = currentYear; y >= 1900; y--) {
-      const opt = document.createElement("option");
-      opt.value = y;
-      opt.text = y;
-      yearSelect.appendChild(opt);
-    }
-
-    // Update days based on month/year
-    function updateDays() {
-      daySelect.innerHTML = "";
-      const year = parseInt(yearSelect.value);
-      const month = parseInt(monthSelect.value);
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      for (let d = 1; d <= daysInMonth; d++) {
-        const opt = document.createElement("option");
-        opt.value = d;
-        opt.text = d;
-        daySelect.appendChild(opt);
-      }
-    }
-
-    monthSelect.addEventListener("change", updateDays);
-    yearSelect.addEventListener("change", updateDays);
-
-    // Sync dropdowns <-> calendar
-    calendar.addEventListener("change", () => {
-      const date = new Date(calendar.value);
-      monthSelect.value = date.getMonth();
-      yearSelect.value = date.getFullYear();
-      updateDays();
-      daySelect.value = date.getDate();
-    });
-
     function calculateAge() {
-      const dob = new Date(yearSelect.value, monthSelect.value, daySelect.value);
-      const today = new Date(document.getElementById("today").value);
+      const dobInput = document.getElementById("dob").value;
+      if (!dobInput) {
+        document.getElementById("result").innerText = "Please select a date of birth.";
+        return;
+      }
 
-      if (isNaN(dob) || isNaN(today) || dob > today) {
-        document.getElementById("result").innerText = "Please select valid dates.";
+      const dob = new Date(dobInput);
+      const today = new Date();
+
+      if (dob > today) {
+        document.getElementById("result").innerText = "Date of birth cannot be in the future.";
         return;
       }
 
@@ -249,8 +192,6 @@
         ${totalSeconds} seconds
       `;
     }
-
-    updateDays();
   </script>
 </body>
 </html>
