@@ -45,9 +45,10 @@
 
     .date-row {
       display: flex;
+      flex-wrap: wrap;
       gap: 10px;
       align-items: center;
-      flex-wrap: wrap;
+      margin-bottom: 10px;
     }
 
     select, input[type="number"] {
@@ -55,8 +56,8 @@
       border: 2px solid #ddd;
       border-radius: 8px;
       font-size: 15px;
-      flex: 1;
-      min-width: 90px;
+      flex: 1 1 30%;
+      min-width: 80px;
       outline: none;
     }
 
@@ -64,17 +65,33 @@
       border-color: #c70039;
     }
 
+    .date-picker-wrapper {
+      position: relative;
+      flex: 1 1 auto;
+    }
+
     input[type="date"] {
       padding: 8px;
       border: 2px solid #ddd;
       border-radius: 8px;
       font-size: 15px;
-      flex: 1.3;
+      width: 100%;
       cursor: pointer;
+      padding-right: 30px;
     }
 
     input[type="date"]:focus {
       border-color: #c70039;
+    }
+
+    .calendar-icon {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      font-size: 18px;
+      color: #c70039;
     }
 
     button {
@@ -88,10 +105,31 @@
       cursor: pointer;
       margin-top: 20px;
       transition: 0.3s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     button:hover {
       background: #a5002e;
+    }
+
+    /* Spinner */
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #fff;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-left: 10px;
+      visibility: hidden;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     #result {
@@ -127,18 +165,21 @@
       <select id="dob-month"></select>
       <select id="dob-day"></select>
       <input type="number" id="dob-year" placeholder="Year" min="1900" max="2100">
-      <input type="date" id="dob-picker" onchange="syncFromPicker('dob')">
+      <div class="date-picker-wrapper">
+        <input type="date" id="dob-picker" onchange="syncFromPicker('dob')">
+        <span class="calendar-icon">📅</span>
+      </div>
     </div>
 
     <label>Age at the Date of</label>
     <div class="date-row">
-      <select id="today-month"></select>
-      <select id="today-day"></select>
-      <input type="number" id="today-year" placeholder="Year" min="1900" max="2100">
-      <input type="date" id="today-picker" onchange="syncFromPicker('today')">
+      <div class="date-picker-wrapper">
+        <input type="date" id="today-picker" onchange="syncFromPicker('today')">
+        <span class="calendar-icon">📅</span>
+      </div>
     </div>
 
-    <button onclick="calculateAge()">Calculate</button>
+    <button onclick="calculateAge()">Calculate <span class="spinner" id="spinner"></span></button>
 
     <div id="result"></div>
 
@@ -166,66 +207,71 @@
         daySelect.add(opt);
       }
     }
-
     populateDropdowns("dob");
-    populateDropdowns("today");
 
     function syncFromPicker(prefix) {
       const picker = document.getElementById(`${prefix}-picker`);
       const date = new Date(picker.value);
       if (isNaN(date)) return;
-      document.getElementById(`${prefix}-month`).value = date.getMonth()+1;
-      document.getElementById(`${prefix}-day`).value = date.getDate();
-      document.getElementById(`${prefix}-year`).value = date.getFullYear();
+      if(document.getElementById(`${prefix}-month`)) document.getElementById(`${prefix}-month`).value = date.getMonth()+1;
+      if(document.getElementById(`${prefix}-day`)) document.getElementById(`${prefix}-day`).value = date.getDate();
+      if(document.getElementById(`${prefix}-year`)) document.getElementById(`${prefix}-year`).value = date.getFullYear();
     }
 
     function calculateAge() {
-      const dob = new Date(
-        document.getElementById("dob-year").value,
-        document.getElementById("dob-month").value - 1,
-        document.getElementById("dob-day").value
-      );
-      const today = new Date(
-        document.getElementById("today-year").value,
-        document.getElementById("today-month").value - 1,
-        document.getElementById("today-day").value
-      );
-      if (isNaN(dob) || isNaN(today) || dob > today) {
-        document.getElementById("result").innerText = "Please select valid dates.";
-        return;
-      }
+      const spinner = document.getElementById("spinner");
+      spinner.style.visibility = "visible";
 
-      let years = today.getFullYear() - dob.getFullYear();
-      let monthsDiff = today.getMonth() - dob.getMonth();
-      let daysDiff = today.getDate() - dob.getDate();
+      setTimeout(() => {
+        const dob = new Date(
+          document.getElementById("dob-year").value,
+          document.getElementById("dob-month").value - 1,
+          document.getElementById("dob-day").value
+        );
+        const today = new Date(
+          document.getElementById("today-picker").value
+        );
 
-      if (daysDiff < 0) {
-        monthsDiff--;
-        const lastMonthDays = new Date(today.getFullYear(), today.getMonth(), 0).getDate();
-        daysDiff += lastMonthDays;
-      }
-      if (monthsDiff < 0) {
-        years--;
-        monthsDiff += 12;
-      }
+        if (isNaN(dob) || isNaN(today) || dob > today) {
+          document.getElementById("result").innerText = "Please select valid dates.";
+          spinner.style.visibility = "hidden";
+          return;
+        }
 
-      const diffMs = today - dob;
-      const totalSeconds = Math.floor(diffMs / 1000);
-      const totalMinutes = Math.floor(totalSeconds / 60);
-      const totalHours = Math.floor(totalMinutes / 60);
-      const totalDays = Math.floor(totalHours / 24);
-      const totalMonths = years * 12 + monthsDiff;
+        let years = today.getFullYear() - dob.getFullYear();
+        let monthsDiff = today.getMonth() - dob.getMonth();
+        let daysDiff = today.getDate() - dob.getDate();
 
-      document.getElementById("result").innerHTML = `
-        <strong>Age:</strong><br>
-        ${years} years, ${monthsDiff} months, ${daysDiff} days<br><br>
-        <strong>Or total:</strong><br>
-        ${totalMonths} months<br>
-        ${totalDays} days<br>
-        ${totalHours} hours<br>
-        ${totalMinutes} minutes<br>
-        ${totalSeconds} seconds
-      `;
+        if (daysDiff < 0) {
+          monthsDiff--;
+          const lastMonthDays = new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+          daysDiff += lastMonthDays;
+        }
+        if (monthsDiff < 0) {
+          years--;
+          monthsDiff += 12;
+        }
+
+        const diffMs = today - dob;
+        const totalSeconds = Math.floor(diffMs / 1000);
+        const totalMinutes = Math.floor(totalSeconds / 60);
+        const totalHours = Math.floor(totalMinutes / 60);
+        const totalDays = Math.floor(totalHours / 24);
+        const totalMonths = years * 12 + monthsDiff;
+
+        document.getElementById("result").innerHTML = `
+          <strong>Age:</strong><br>
+          ${years} years, ${monthsDiff} months, ${daysDiff} days<br><br>
+          <strong>Or total:</strong><br>
+          ${totalMonths} months<br>
+          ${totalDays} days<br>
+          ${totalHours} hours<br>
+          ${totalMinutes} minutes<br>
+          ${totalSeconds} seconds
+        `;
+
+        spinner.style.visibility = "hidden";
+      }, 300);
     }
   </script>
 </body>
