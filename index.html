@@ -1,54 +1,92 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Free Age Calculator — Accurate Years, Months, Days</title>
-  <meta name="description" content="Free online age calculator: find your exact age in years, months, days, hours and minutes. Mobile-friendly and fast." />
-  <meta name="keywords" content="age calculator, age calculator online, how old am I, date of birth calculator" />
-  <meta name="author" content="Faisal Parvej" />
-  <meta name="geo.region" content="US" />
-  <link rel="canonical" href="https://USERNAME.github.io/age-calculator/" />
-  <meta name="robots" content="index, follow" />
-
-  <!-- Open Graph (for social sharing) -->
-  <meta property="og:title" content="Free Age Calculator — Accurate Years, Months, Days" />
-  <meta property="og:description" content="Free online age calculator: find your exact age in years, months, days, hours and minutes. Mobile-friendly and fast." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://USERNAME.github.io/age-calculator/" />
-  <meta property="og:image" content="/og-image.png" />
-
-  <link rel="stylesheet" href="/styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Age Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f6fc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .box {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 300px;
+    }
+    h1 {
+      color: #0b5ed7;
+    }
+    input, button {
+      margin-top: 10px;
+      padding: 10px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #0b5ed7;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background-color: #094bb3;
+    }
+    #result {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
 </head>
 <body>
-  <main class="container">
-    <header>
-      <h1>Age Calculator</h1>
-      <p class="subtitle">Enter your date of birth to calculate your exact age.</p>
-    </header>
+  <div class="box">
+    <h1>Age Calculator</h1>
+    <label for="dob">Date of Birth</label>
+    <input type="date" id="dob"><br>
+    <label for="calcDate">Calculate Age On</label>
+    <input type="date" id="calcDate"><br>
+    <button onclick="calculateAge()">Calculate</button>
+    <p id="result"></p>
+  </div>
 
-    <section class="card">
-      <label for="dob">Date of birth</label>
-      <input id="dob" type="date" aria-label="Date of birth" />
+  <script>
+    function calculateAge() {
+      const dob = new Date(document.getElementById("dob").value);
+      const calcDate = new Date(document.getElementById("calcDate").value);
 
-      <label for="time">Time of birth (optional)</label>
-      <input id="time" type="time" aria-label="Time of birth" />
+      if (!dob || !calcDate || dob > calcDate) {
+        document.getElementById("result").innerText = "⚠️ Please enter valid dates!";
+        return;
+      }
 
-      <button id="calc">Calculate age</button>
+      let years = calcDate.getFullYear() - dob.getFullYear();
+      let months = calcDate.getMonth() - dob.getMonth();
+      let days = calcDate.getDate() - dob.getDate();
 
-      <div id="result" class="result" aria-live="polite">Your age will appear here.</div>
+      if (days < 0) {
+        months--;
+        days += 30;
+      }
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
 
-      <small class="byline">Made by Faisal Parvej</small>
-    </section>
-
-    <footer>
-      <nav>
-        <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a>
-      </nav>
-      <p>&copy; <span id="year"></span> Faisal Parvej</p>
-    </footer>
-  </main>
-
-  <script src="/script.js"></script>
+      document.getElementById("result").innerText =
+        `🎂 Age: ${years} years, ${months} months, ${days} days`;
+    }
+  </script>
 </body>
 </html>
