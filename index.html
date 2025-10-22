@@ -4,9 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Age Calculator | Faisal69XD</title>
-  <meta name="description" content="Professional Age Calculator with red theme. Calculate exact years, months, days, hours, minutes, and seconds." />
-  <meta name="keywords" content="age calculator, red theme, years, months, days, hours, minutes, seconds, Faisal69XD" />
-  <link rel="icon" href="https://i.ibb.co/ZYW3VTp/logo.png" type="image/png" />
+  <meta name="description" content="Professional red theme Age Calculator showing detailed years, months, days, hours, minutes, and seconds." />
+  <meta name="keywords" content="age calculator, detailed, years, months, days, Faisal69XD" />
 
   <style>
     body {
@@ -29,34 +28,31 @@
       text-align: center;
     }
 
-    .logo {
-      width: 80px;
-      margin-bottom: 20px;
-    }
-
     h1 {
       color: #c70039;
       margin-bottom: 25px;
       font-size: 26px;
     }
 
-    .input-group {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 15px;
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 600;
+      color: #333;
     }
 
-    .input-group input {
-      width: 30%;
+    input {
+      width: 100%;
       padding: 10px;
       border-radius: 10px;
       border: 2px solid #ddd;
       font-size: 16px;
       outline: none;
       transition: 0.3s;
+      margin-top: 8px;
     }
 
-    .input-group input:focus {
+    input:focus {
       border-color: #c70039;
     }
 
@@ -68,7 +64,7 @@
       border-radius: 10px;
       font-size: 16px;
       cursor: pointer;
-      margin-top: 15px;
+      margin-top: 20px;
       transition: 0.3s;
     }
 
@@ -77,11 +73,16 @@
     }
 
     #result {
-      margin-top: 20px;
+      margin-top: 25px;
       font-size: 18px;
       font-weight: 600;
       color: #222;
       text-align: left;
+      line-height: 1.7;
+      background: #fff5f7;
+      border-left: 4px solid #c70039;
+      padding: 10px 15px;
+      border-radius: 8px;
     }
 
     footer {
@@ -95,84 +96,71 @@
       text-decoration: none;
       font-weight: bold;
     }
-
-    @media(max-width: 480px){
-      .input-group input {
-        width: 28%;
-      }
-    }
   </style>
 </head>
 <body>
   <div class="container">
-    <img src="https://i.ibb.co/ZYW3VTp/logo.png" alt="Logo" class="logo" />
     <h1>Age Calculator</h1>
 
-    <label>Date of Birth</label>
-    <div class="input-group">
-      <input type="number" id="dobDay" placeholder="DD" min="1" max="31" />
-      <input type="number" id="dobMonth" placeholder="MM" min="1" max="12" />
-      <input type="number" id="dobYear" placeholder="YYYY" min="1900" max="2100" />
-    </div>
+    <label for="dob">Date of Birth</label>
+    <input type="date" id="dob" />
 
-    <label>Calculate Age At</label>
-    <div class="input-group">
-      <input type="number" id="todayDay" placeholder="DD" min="1" max="31" />
-      <input type="number" id="todayMonth" placeholder="MM" min="1" max="12" />
-      <input type="number" id="todayYear" placeholder="YYYY" min="1900" max="2100" />
-    </div>
+    <label for="today">Calculate Age At</label>
+    <input type="date" id="today" />
 
     <button onclick="calculateAge()">Calculate</button>
+
     <div id="result"></div>
 
-    <footer>Developed by <a href="https://github.com/FAISAL69XD" target="_blank">Faisal69XD</a></footer>
+    <footer>
+      Developed by <a href="https://github.com/FAISAL69XD" target="_blank">Faisal69XD</a>
+    </footer>
   </div>
 
   <script>
     function calculateAge() {
-      const dDay = parseInt(document.getElementById("dobDay").value);
-      const dMonth = parseInt(document.getElementById("dobMonth").value) - 1;
-      const dYear = parseInt(document.getElementById("dobYear").value);
+      const dob = new Date(document.getElementById("dob").value);
+      const today = new Date(document.getElementById("today").value);
 
-      const tDay = parseInt(document.getElementById("todayDay").value);
-      const tMonth = parseInt(document.getElementById("todayMonth").value) - 1;
-      const tYear = parseInt(document.getElementById("todayYear").value);
-
-      const dob = new Date(dYear, dMonth, dDay);
-      const today = new Date(tYear, tMonth, tDay);
-
-      if (isNaN(dob) || isNaN(today) || dob > today) {
-        document.getElementById("result").innerText = "Please enter valid dates.";
+      if (!dob || !today || isNaN(dob) || isNaN(today) || dob > today) {
+        document.getElementById("result").innerText = "Please select valid dates.";
         return;
       }
 
-      let diff = today - dob;
-
-      let seconds = Math.floor(diff / 1000);
-      let minutes = Math.floor(seconds / 60);
-      let hours = Math.floor(minutes / 60);
-      let days = Math.floor(hours / 24);
+      // Age calculation (Years, Months, Days)
       let years = today.getFullYear() - dob.getFullYear();
       let months = today.getMonth() - dob.getMonth();
-      let dayRemain = today.getDate() - dob.getDate();
+      let days = today.getDate() - dob.getDate();
 
-      if (dayRemain < 0) {
+      if (days < 0) {
         months--;
-        const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-        dayRemain += lastMonth.getDate();
+        const lastMonthDays = new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+        days += lastMonthDays;
       }
+
       if (months < 0) {
         years--;
         months += 12;
       }
 
+      // Total calculations
+      const diffMs = today - dob;
+      const totalSeconds = Math.floor(diffMs / 1000);
+      const totalMinutes = Math.floor(totalSeconds / 60);
+      const totalHours = Math.floor(totalMinutes / 60);
+      const totalDays = Math.floor(totalHours / 24);
+      const totalMonths = years * 12 + months;
+
+      // Output
       document.getElementById("result").innerHTML = `
-        <p>Years: ${years}</p>
-        <p>Months: ${months}</p>
-        <p>Days: ${dayRemain}</p>
-        <p>Hours: ${hours}</p>
-        <p>Minutes: ${minutes}</p>
-        <p>Seconds: ${seconds}</p>
+        Age:<br>
+        ${years} years, ${months} months, ${days} days<br><br>
+        Or total:<br>
+        ${totalMonths} months<br>
+        ${totalDays} days<br>
+        ${totalHours} hours<br>
+        ${totalMinutes} minutes<br>
+        ${totalSeconds} seconds
       `;
     }
   </script>
